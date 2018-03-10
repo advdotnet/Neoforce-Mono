@@ -375,9 +375,15 @@ namespace TomShane.Neoforce.Controls
 
     ////////////////////////////////////////////////////////////////////////////           
     public virtual void Center()
-    {
-      Left = (Manager.ScreenWidth / 2) - (Width / 2);
-      Top = (Manager.ScreenHeight - Height) / 2;
+    {        
+        Left = (Manager.ScreenWidth / 2) - (Width / 2);
+        Top = (Manager.ScreenHeight - Height) / 2;        
+    }
+
+    public virtual void Center(Point size)
+    {                
+        Left = (size.X / 2) - (Width / 2);
+        Top = (size.Y - Height) / 2;        
     }
     ////////////////////////////////////////////////////////////////////////////           
 

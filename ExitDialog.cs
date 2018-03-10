@@ -61,13 +61,13 @@ namespace TomShane.Neoforce.Controls
     ////////////////////////////////////////////////////////////////////////////       
     public ExitDialog(Manager manager): base(manager)
     {
-      string msg = "Do you really want to exit " + Manager.Game.Window.Title + "?";
+      string msg = "Do you really want to exit?";
       ClientWidth = (int)Manager.Skin.Controls["Label"].Layers[0].Text.Font.Resource.MeasureString(msg).X + 48 + 16 + 16 + 16;                         
       ClientHeight = 120;
       TopPanel.Visible = false;
       IconVisible = true;      
       Resizable = false;
-      Text = Manager.Game.Window.Title;
+      Text = "Title";
       Center();   
             
       imgIcon = new ImageBox(Manager);

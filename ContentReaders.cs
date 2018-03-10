@@ -21,13 +21,11 @@
 #region //// Using /////////////
 
 //////////////////////////////////////////////////////////////////////////////
-using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Xna.Framework.Content;
 
 #if (!XBOX && !XBOX_FAKE)
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 #endif
 //////////////////////////////////////////////////////////////////////////////
@@ -115,27 +113,25 @@ namespace TomShane.Neoforce.Controls
                 string path = Path.GetTempFileName();
                 File.WriteAllBytes(path, data);
                 string tPath = Path.GetTempFileName();
-                using(System.Drawing.Icon i = System.Drawing.Icon.ExtractAssociatedIcon(path))
+
+                using (System.Drawing.Icon i = System.Drawing.Icon.ExtractAssociatedIcon(path))
                 {
                     using (System.Drawing.Bitmap b = i.ToBitmap())
                     {
-
                         b.Save(tPath, System.Drawing.Imaging.ImageFormat.Png);
                         b.Dispose();
                     }
-                    
+
                     i.Dispose();
                 }
-                //TODO: Replace with xml based solution for getting hotspot and size instead
-                IntPtr handle = NativeMethods.LoadCursor(path);
-                System.Windows.Forms.Cursor c = new System.Windows.Forms.Cursor(handle);
-                Vector2 hs = new Vector2(c.HotSpot.X, c.HotSpot.Y);
-                int w = c.Size.Width;
-                int h = c.Size.Height;
-                c.Dispose();
+
+                Vector2 hs = Vector2.Zero;
+                int w = 32;
+                int h = 32;
+
                 File.Delete(path);
 
-                return new Cursor(tPath, hs, w, h);
+                return new Cursor(null, hs, w, h);
             }
             else
             {

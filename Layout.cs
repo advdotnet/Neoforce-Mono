@@ -66,7 +66,7 @@ namespace TomShane.Neoforce.Controls
     {
       Container win = null;
       LayoutXmlDocument doc = new LayoutXmlDocument();
-      ArchiveManager content = new ArchiveManager(manager.Game.Services);            
+      ArchiveManager content = new ArchiveManager(manager.Services);            
       
       try
       {      

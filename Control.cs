@@ -1840,6 +1840,8 @@ namespace TomShane.Neoforce.Controls
         ////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////
+        ControlsList CList = new ControlsList();
+
         protected internal override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -1848,9 +1850,9 @@ namespace TomShane.Neoforce.Controls
 
             if (controls != null)
             {
-                ControlsList list = new ControlsList();
-                list.AddRange(controls);
-                foreach (Control c in list)
+                CList.Clear();
+                CList.AddRange(controls);
+                foreach (Control c in CList)                
                 {
                     c.Update(gameTime);
                 }

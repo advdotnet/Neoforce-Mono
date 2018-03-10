@@ -50,7 +50,7 @@ namespace TomShane.Neoforce.Controls
     /// <summary>
     /// Manages rendering of all controls.
     /// </summary>  
-    public class Manager : DrawableGameComponent
+    public class Manager
     {
 
         private struct ControlStates
@@ -65,8 +65,6 @@ namespace TomShane.Neoforce.Controls
         ////////////////////////////////////////////////////////////////////////////        
         internal Version _SkinVersion = new Version(0, 7);
         internal Version _LayoutVersion = new Version(0, 7);
-        internal const string _SkinDirectory = ".\\Content\\Skins\\";
-        internal const string _LayoutDirectory = ".\\Content\\Layout\\";
         internal const string _DefaultSkin = "Default";
         internal const string _SkinExtension = ".skin";
         internal const int _MenuDelay = 500;
@@ -89,7 +87,8 @@ namespace TomShane.Neoforce.Controls
         private int targetFrames = 60;
         private long drawTime = 0;
         private long updateTime = 0;
-        private GraphicsDeviceManager graphics = null;
+        private IServiceProvider services = null;
+        private GraphicsDevice graphics = null;
         private ArchiveManager content = null;
         private Renderer renderer = null;
         private InputSystem input = null;
@@ -99,8 +98,8 @@ namespace TomShane.Neoforce.Controls
         private ControlsList orderList = null;
         private Skin skin = null;
         private string skinName = _DefaultSkin;
-        private string layoutDirectory = _LayoutDirectory;
-        private string skinDirectory = _SkinDirectory;
+        private string layoutDirectory;
+        private string skinDirectory;
         private string skinExtension = _SkinExtension;
         private Control focusedControl = null;
         private ModalContainer modalWindow = null;
@@ -160,17 +159,13 @@ namespace TomShane.Neoforce.Controls
         /// <summary>
         /// Returns associated <see cref="Game"/> component.
         /// </summary>
-        public virtual new Game Game { get { return base.Game; } }
+        public IServiceProvider Services { get { return services; } }
 
         /// <summary>
         /// Returns associated <see cref="GraphicsDevice"/>.
         /// </summary>
-        public virtual new GraphicsDevice GraphicsDevice { get { return base.GraphicsDevice; } }
+        public virtual GraphicsDevice GraphicsDevice { get { return graphics; } }
 
-        /// <summary>
-        /// Returns associated <see cref="GraphicsDeviceManager"/>.
-        /// </summary>
-        public virtual GraphicsDeviceManager Graphics { get { return graphics; } }
 
         /// <summary>
         /// Returns <see cref="Renderer"/> used for rendering controls.
@@ -322,18 +317,18 @@ namespace TomShane.Neoforce.Controls
         {
             get
             {
-                if (!skinDirectory.EndsWith("\\"))
+                if (!skinDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
                 {
-                    skinDirectory += "\\";
+                    skinDirectory += Path.DirectorySeparatorChar.ToString();
                 }
                 return skinDirectory;
             }
             set
             {
                 skinDirectory = value;
-                if (!skinDirectory.EndsWith("\\"))
+                if (!skinDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
                 {
-                    skinDirectory += "\\";
+                    skinDirectory += Path.DirectorySeparatorChar.ToString();
                 }
             }
         }
@@ -347,18 +342,18 @@ namespace TomShane.Neoforce.Controls
         {
             get
             {
-                if (!layoutDirectory.EndsWith("\\"))
+                if (!layoutDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
                 {
-                    layoutDirectory += "\\";
+                    layoutDirectory += Path.DirectorySeparatorChar.ToString();
                 }
                 return layoutDirectory;
             }
             set
             {
                 layoutDirectory = value;
-                if (!layoutDirectory.EndsWith("\\"))
+                if (!layoutDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
                 {
-                    layoutDirectory += "\\";
+                    layoutDirectory += Path.DirectorySeparatorChar.ToString();
                 }
             }
         }
@@ -575,10 +570,6 @@ namespace TomShane.Neoforce.Controls
         /// </summary>
         public event SkinEventHandler SkinChanged;
 
-        /// <summary>
-        /// Occurs when game window is about to close.
-        /// </summary>
-        public event WindowClosingEventHandler WindowClosing;
         ////////////////////////////////////////////////////////////////////////////
 
         #endregion
@@ -598,21 +589,23 @@ namespace TomShane.Neoforce.Controls
         /// <param name="skin">
         /// The name of the skin being loaded at the start.
         /// </param>
-        public Manager(Game game, GraphicsDeviceManager graphics, string skin)
-            : base(game)
+        public Manager(IServiceProvider gameServiceContainer, GraphicsDevice graphics, string skin)
         {
             disposing = false;
 
+            layoutDirectory = "." + Path.DirectorySeparatorChar + "Content" + Path.DirectorySeparatorChar + "Layout" + Path.DirectorySeparatorChar;
+            skinDirectory = "." + Path.DirectorySeparatorChar + "Content" + Path.DirectorySeparatorChar + "Skins" + Path.DirectorySeparatorChar;
+
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(HandleUnhadledExceptions);
 
-            content = new ArchiveManager(Game.Services);
+            content = new ArchiveManager(gameServiceContainer);
             input = new InputSystem(this, new InputOffset(0, 0, 1f, 1f));
             components = new List<Component>();
             controls = new ControlsList();
             orderList = new ControlsList();
 
             this.graphics = graphics;
-            graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(PrepareGraphicsDevice);
+            this.services = gameServiceContainer;
 
             skinName = skin;
 
@@ -644,21 +637,6 @@ namespace TomShane.Neoforce.Controls
         }
         ////////////////////////////////////////////////////////////////////////////                   
 
-        ////////////////////////////////////////////////////////////////////////////
-        /// <summary>
-        /// Initializes a new instance of the Manager class.
-        /// </summary>
-        /// <param name="game">
-        /// The Game class.
-        /// </param>   
-        /// <param name="skin">
-        /// The name of the skin being loaded at the start.
-        /// </param>
-        public Manager(Game game, string skin)
-            : this(game, game.Services.GetService(typeof(IGraphicsDeviceManager)) as GraphicsDeviceManager, skin)
-        {
-        }
-        ////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -670,23 +648,13 @@ namespace TomShane.Neoforce.Controls
         /// <param name="graphics">
         /// The GraphicsDeviceManager class provided by the Game class.
         /// </param>
-        public Manager(Game game, GraphicsDeviceManager graphics)
-            : this(game, graphics, _DefaultSkin)
+        public Manager(GameServiceContainer gameServiceContainer, GraphicsDevice graphics)
+            : this(gameServiceContainer, graphics, _DefaultSkin)
         {
         }
         ////////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////////
-        /// <summary>
-        /// Initializes a new instance of the Manager class, loads the default skin and registers manager in the game class automatically.
-        /// </summary>
-        /// <param name="game">
-        /// The Game class.
-        /// </param>
-        public Manager(Game game)
-            : this(game, game.Services.GetService(typeof(IGraphicsDeviceManager)) as GraphicsDeviceManager, _DefaultSkin)
-        {
-        }
+
         ////////////////////////////////////////////////////////////////////////////
 
         #endregion
@@ -694,7 +662,7 @@ namespace TomShane.Neoforce.Controls
         #region //// Destructors ///////
 
         ////////////////////////////////////////////////////////////////////////////
-        protected override void Dispose(bool disposing)
+        public void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -740,7 +708,7 @@ namespace TomShane.Neoforce.Controls
             }
             if (GraphicsDevice != null)
                 GraphicsDevice.DeviceReset -= new System.EventHandler<System.EventArgs>(GraphicsDevice_DeviceReset);
-            base.Dispose(disposing);
+
         }
         ////////////////////////////////////////////////////////////////////////////
 
@@ -754,8 +722,7 @@ namespace TomShane.Neoforce.Controls
             this.cursor = cursor;
             if (this.cursor.CursorTexture == null)
             {
-                this.cursor.CursorTexture = Texture2D.FromStream(GraphicsDevice, new FileStream(
-                    this.cursor.cursorPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None));
+
             }
         }
         ////////////////////////////////////////////////////////////////////////////
@@ -847,15 +814,8 @@ namespace TomShane.Neoforce.Controls
         /// Initializes the controls manager.
         /// </summary>    
         ////////////////////////////////////////////////////////////////////////////
-        public override void Initialize()
+        public void Initialize()
         {
-            base.Initialize();
-
-            Game.Window.ClientSizeChanged += (object sender, System.EventArgs e) => 
-            { 
-                InvalidateRenderTarget(); 
-            };
-
             if (autoCreateRenderTarget)
             {
                 if (renderTarget != null)
@@ -1025,7 +985,10 @@ namespace TomShane.Neoforce.Controls
         /// <param name="gameTime">
         /// Time elapsed since the last call to Update.
         /// </param>
-        public override void Update(GameTime gameTime)
+        /// 
+        private MouseState _mouse = new MouseState();
+
+        public void Update(GameTime gameTime, KeyboardState keyboard, MouseState mouse)
         {
             updateTime += gameTime.ElapsedGameTime.Ticks;
             double ms = TimeSpan.FromTicks(updateTime).TotalMilliseconds;
@@ -1036,9 +999,11 @@ namespace TomShane.Neoforce.Controls
                 gameTime = new GameTime(gameTime.TotalGameTime, span);
                 updateTime = 0;
 
+                _mouse = mouse;
+
                 if (inputEnabled)
                 {
-                    input.Update(gameTime);
+                    input.Update(gameTime, keyboard, mouse);
                 }
 
                 if (components != null)
@@ -1049,11 +1014,12 @@ namespace TomShane.Neoforce.Controls
                     }
                 }
 
-                ControlsList list = new ControlsList(controls);
+                CList.Clear();
+                CList.AddRange(controls);
 
-                if (list != null)
+                if (CList != null)
                 {
-                    foreach (Control c in list)
+                    foreach (Control c in CList)
                     {
                         c.Update(gameTime);
                     }
@@ -1063,6 +1029,8 @@ namespace TomShane.Neoforce.Controls
                 SortLevel(controls);
             }
         }
+
+        ControlsList CList = new ControlsList();
         ////////////////////////////////////////////////////////////////////////////   
 
         ////////////////////////////////////////////////////////////////////////////
@@ -1156,8 +1124,9 @@ namespace TomShane.Neoforce.Controls
         }
         //////////////////////////////////////////////////////////////////////////// 
 
-        ////////////////////////////////////////////////////////////////////////////   
-        public override void Draw(GameTime gameTime)
+        ////////////////////////////////////////////////////////////////////////////           
+
+        public void Draw(GameTime gameTime)
         {
             if (renderTarget != null)
             {
@@ -1167,15 +1136,15 @@ namespace TomShane.Neoforce.Controls
                 //if (targetFrames == 0 || (ms == 0 || ms >= (1000f / targetFrames)))
                 //{
                 TimeSpan span = TimeSpan.FromTicks(drawTime);
-                gameTime = new GameTime(gameTime.TotalGameTime, span);
                 drawTime = 0;
 
                 if ((controls != null))
                 {
-                    ControlsList list = new ControlsList();
-                    list.AddRange(controls);
 
-                    foreach (Control c in list)
+                    CList.Clear();
+                    CList.AddRange(controls);
+
+                    foreach (Control c in CList)
                     {
                         c.PrepareTexture(renderer, gameTime);
                     }
@@ -1185,7 +1154,7 @@ namespace TomShane.Neoforce.Controls
 
                     if (renderer != null)
                     {
-                        foreach (Control c in list)
+                        foreach (Control c in CList)
                         {
                             c.Render(renderer, gameTime);
                         }
@@ -1194,14 +1163,9 @@ namespace TomShane.Neoforce.Controls
 
                 if (softwareCursor && Cursor != null)
                 {
-                    if (this.cursor.CursorTexture == null)
-                    {
-                        this.cursor.CursorTexture = Texture2D.FromStream(GraphicsDevice, new FileStream(
-                            this.cursor.cursorPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None));
-                    }
                     renderer.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-                    MouseState mstate = Mouse.GetState();
-                    Rectangle rect = new Rectangle(mstate.X, mstate.Y, Cursor.Width, Cursor.Height);
+
+                    Rectangle rect = new Rectangle(_mouse.X, _mouse.Y, Cursor.Width, Cursor.Height);
                     renderer.SpriteBatch.Draw(Cursor.CursorTexture, rect, null, Color.White, 0f, Cursor.HotSpot, SpriteEffects.None, 0f);
                     renderer.SpriteBatch.End();
                 }
@@ -1237,7 +1201,7 @@ namespace TomShane.Neoforce.Controls
             if (renderTarget != null && !deviceReset)
             {
                 renderer.Begin(BlendingMode.Default);
-                renderer.Draw(RenderTarget, rect, Color.White);
+                renderer.Draw(RenderTarget, 0, 0, Color.White);
                 renderer.End();
             }
             else if (deviceReset)

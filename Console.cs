@@ -21,12 +21,10 @@
 #region //// Using /////////////
 
 ////////////////////////////////////////////////////////////////////////////
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.GamerServices;
 ////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -264,6 +262,11 @@ namespace TomShane.Neoforce.Controls
                 PositionControls();
             }
         }
+
+        public TextBox TextBox
+        {
+            get { return txtMain; }
+        }
         ////////////////////////////////////////////////////////////////////////////       
 
         #endregion
@@ -400,8 +403,8 @@ namespace TomShane.Neoforce.Controls
                     for (int i = s - 1; i >= f; i--)
                     {
                         {
-                            int x = 4;
-                            int y = r.Bottom - (pos + 1) * ((int)font.LineSpacing + 0);
+                            int x = r.Left + 4;
+                            int y = r.Bottom - (pos + 1) * ((int)font.LineSpacing + 0) + 2;
 
                             string msg = ((ConsoleMessage)b[i]).Text;
                             string pre = "";
@@ -468,8 +471,6 @@ namespace TomShane.Neoforce.Controls
         ////////////////////////////////////////////////////////////////////////////        
         private void SendMessage(EventArgs x)
         {
-            if (Manager.UseGuide && Guide.IsVisible) return;
-
             KeyEventArgs k = new KeyEventArgs();
             GamePadEventArgs g = new GamePadEventArgs(PlayerIndex.One);
 
@@ -487,9 +488,9 @@ namespace TomShane.Neoforce.Controls
                     x.Handled = true;
 
                     ConsoleMessageEventArgs me = new ConsoleMessageEventArgs(new ConsoleMessage(sender, message, ch.Index));
-                    OnMessageSent(me);
 
                     buffer.Add(new ConsoleMessage(sender, me.Message.Text, me.Message.Channel));
+                    OnMessageSent(me);
 
                     txtMain.Text = "";
                     ClientArea.Invalidate();

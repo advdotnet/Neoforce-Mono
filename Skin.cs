@@ -21,12 +21,12 @@
 #region //// Using /////////////
 
 ////////////////////////////////////////////////////////////////////////////
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 ////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -561,7 +561,7 @@ namespace TomShane.Neoforce.Controls
             : base(manager)
         {
             this.name = name;
-            content = new ArchiveManager(Manager.Game.Services, GetArchiveLocation(name + Manager.SkinExtension));
+            content = new ArchiveManager(Manager.Services, GetArchiveLocation(name + Manager.SkinExtension));
             content.RootDirectory = GetFolder();
             doc = new SkinXmlDocument();
             controls = new SkinList<SkinControl>();
@@ -627,7 +627,7 @@ namespace TomShane.Neoforce.Controls
         ////////////////////////////////////////////////////////////////////////////     
         private string GetArchiveLocation(string name)
         {
-            string path = Path.GetFullPath(Manager.SkinDirectory) + Path.GetFileNameWithoutExtension(name) + "\\";
+            string path = Path.GetFullPath(Manager.SkinDirectory) + Path.GetFileNameWithoutExtension(name) + Path.DirectorySeparatorChar;
             if (!Directory.Exists(path) || !File.Exists(path + "Skin.xnb"))
             {
                 path = Path.GetFullPath(Manager.SkinDirectory) + name;
@@ -706,7 +706,13 @@ namespace TomShane.Neoforce.Controls
                 content.UseArchive = cursors[i].Archive;
                 string asset = GetAsset("Cursors", cursors[i].Asset, cursors[i].Addon);
                 asset = content.UseArchive ? asset : Path.GetFullPath(asset);
-                cursors[i].Resource = content.Load<Cursor>(asset);
+                var texture = content.Load<Texture2D>(asset);
+                var hotspot = Vector2.Zero;
+                if (asset.EndsWith("Text"))
+                {
+                    hotspot = new Vector2(12, 12);
+                }
+                cursors[i].Resource = new Cursor(texture, hotspot, 32, 32);
             }
 #endif
 
