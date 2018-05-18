@@ -21,16 +21,12 @@
 #region //// Using /////////////
 
 ////////////////////////////////////////////////////////////////////////////
-using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 #if (!XBOX && !XBOX_FAKE)
-using System.Media;
-using System.Collections;
-using System.ComponentModel;
 #endif
 ////////////////////////////////////////////////////////////////////////////
 
@@ -170,10 +166,7 @@ namespace TomShane.Neoforce.Controls
         private Margins anchorMargins = new Margins();
         private Margins clientMargins = new Margins();
         private Rectangle outlineRect = Rectangle.Empty;
-        /// <summary>
-        /// Tracks the position of the mouse scroll wheel
-        /// </summary>
-        private int scrollWheel = 0;
+
         ////////////////////////////////////////////////////////////////////////////                     
 
         #endregion
@@ -1852,7 +1845,7 @@ namespace TomShane.Neoforce.Controls
             {
                 CList.Clear();
                 CList.AddRange(controls);
-                foreach (Control c in CList)                
+                foreach (Control c in CList)
                 {
                     c.Update(gameTime);
                 }

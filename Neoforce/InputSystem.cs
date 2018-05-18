@@ -223,7 +223,7 @@ namespace TomShane.Neoforce.Controls
         private List<InputMouseButton> mouseButtons = new List<InputMouseButton>();
         private List<InputGamePadButton> gamePadButtons = new List<InputGamePadButton>();
         private MouseState mouseState = new MouseState();
-        private GamePadState gamePadState = new GamePadState();
+        //private GamePadState gamePadState = new GamePadState();
         private Manager manager = null;
         private InputOffset inputOffset = new InputOffset(0, 0, 1.0f, 1.0f);
         private InputMethods inputMethods = InputMethods.All;
@@ -435,73 +435,7 @@ namespace TomShane.Neoforce.Controls
         ////////////////////////////////////////////////////////////////////////////
         private void UpdateGamePad(PlayerIndex playerIndex, GamePadState state, GameTime gameTime)
         {
-            return; // Monogame 3.4
-            GamePadEventArgs e = new GamePadEventArgs(playerIndex);
-
-            if (state.ThumbSticks.Left != gamePadState.ThumbSticks.Left ||
-                state.ThumbSticks.Right != gamePadState.ThumbSticks.Right ||
-                state.Triggers.Left != gamePadState.Triggers.Left ||
-                state.Triggers.Right != gamePadState.Triggers.Right)
-            {
-                BuildGamePadEvent(state, GamePadButton.None, ref e);
-                if (GamePadMove != null) GamePadMove.Invoke(this, e);
-            }
-
-            foreach (InputGamePadButton btn in gamePadButtons)
-            {
-                ButtonState bs = ButtonState.Released;
-
-                if (btn.Button == GamePadButton.None) continue;
-                else if (btn.Button == GamePadButton.A) bs = state.Buttons.A;
-                else if (btn.Button == GamePadButton.B) bs = state.Buttons.B;
-                else if (btn.Button == GamePadButton.Back) bs = state.Buttons.Back;
-                else if (btn.Button == GamePadButton.Down) bs = state.DPad.Down;
-                else if (btn.Button == GamePadButton.Left) bs = state.DPad.Left;
-                else if (btn.Button == GamePadButton.Right) bs = state.DPad.Right;
-                else if (btn.Button == GamePadButton.Start) bs = state.Buttons.Start;
-                else if (btn.Button == GamePadButton.Up) bs = state.DPad.Up;
-                else if (btn.Button == GamePadButton.X) bs = state.Buttons.X;
-                else if (btn.Button == GamePadButton.Y) bs = state.Buttons.Y;
-                else if (btn.Button == GamePadButton.BigButton) bs = state.Buttons.BigButton;
-                else if (btn.Button == GamePadButton.LeftShoulder) bs = state.Buttons.LeftShoulder;
-                else if (btn.Button == GamePadButton.RightShoulder) bs = state.Buttons.RightShoulder;
-                else if (btn.Button == GamePadButton.LeftStick) bs = state.Buttons.LeftStick;
-                else if (btn.Button == GamePadButton.RightStick) bs = state.Buttons.RightStick;
-                else bs = GetVectorState(btn.Button, state);
-
-                bool pressed = (bs == ButtonState.Pressed);
-                if (pressed)
-                {
-                    double ms = gameTime.ElapsedGameTime.TotalMilliseconds;
-                    if (pressed) btn.Countdown -= ms;
-                }
-
-                if ((pressed) && (!btn.Pressed))
-                {
-                    btn.Pressed = true;
-                    BuildGamePadEvent(state, btn.Button, ref e);
-
-                    if (GamePadDown != null) GamePadDown.Invoke(this, e);
-                    if (GamePadPress != null) GamePadPress.Invoke(this, e);
-                }
-                else if ((!pressed) && (btn.Pressed))
-                {
-                    btn.Pressed = false;
-                    btn.Countdown = RepeatDelay;
-                    BuildGamePadEvent(state, btn.Button, ref e);
-
-                    if (GamePadUp != null) GamePadUp.Invoke(this, e);
-                }
-                else if (btn.Pressed && btn.Countdown < 0)
-                {
-                    e.Button = btn.Button;
-                    btn.Countdown = RepeatRate;
-                    BuildGamePadEvent(state, btn.Button, ref e);
-
-                    if (GamePadPress != null) GamePadPress.Invoke(this, e);
-                }
-            }
-            gamePadState = state;
+            return; // Monogame 3.4           
         }
         ////////////////////////////////////////////////////////////////////////////
 
