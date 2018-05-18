@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomShane.Neoforce.Controls", "TomShane.Neoforce.Controls.csproj", "{AC5F1CD8-AA8E-4DB5-814F-86C214175841}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomShane.Neoforce.Controls", "Neoforce\TomShane.Neoforce.Controls.csproj", "{AC5F1CD8-AA8E-4DB5-814F-86C214175841}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA", "FNA\FNA.csproj", "{35253CE1-C864-4CD3-8249-4D1319748E8F}"
 EndProject
